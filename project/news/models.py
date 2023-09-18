@@ -21,11 +21,11 @@ class Author(models.Model):
 
     def update_rating(self):
         author_post_rating = Post.objects.filter(author_id=self.pk).aggregate(
-            post_rating_sum=Coalesce(Sum('rating_post') * 3, 0))
+            post_rating_sum=Coalesce(Sum('rating') * 3, 0))
         author_comment_rating = Comment.objects.filter(user_id=self.user).aggregate(
-            comments_rating_sum=Coalesce(Sum('rating_comment'), 0))
+            comments_rating_sum=Coalesce(Sum('rating'), 0))
         author_post_comment_rating = Comment.objects.filter(post__author__name=self.user).aggregate(
-            comments_rating_sum=Coalesce(Sum('rating_comment'), 0))
+            comments_rating_sum=Coalesce(Sum('rating'), 0))
         self.rating_author = author_post_rating['post_rating_sum'] + author_comment_rating['comments_rating_sum'] + author_post_comment_rating['comments_rating_sum']
         self.save()
 
