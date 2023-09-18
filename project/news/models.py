@@ -1,21 +1,34 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import Sum
+from django.db.models.functions import Coalesce
 
 
+article = 'AR'
+news = 'NE'
+
+choices = [
+    (article, 'Cтатья'),
+    (news, 'Новость'),
+]
 # Модель, содержащая объекты всех авторов.
 # Имеет следующие поля:
 # связь «один к одному» с встроенной моделью пользователей User;
 # рейтинг пользователя. Ниже будет дано описание того, как этот рейтинг можно посчитать.
 class Author(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    rating_user = models.FloatField(default=0)
+    rating_author = models.IntegerField(default=0)
 
     def update_rating(self):
-        post_rating = self.post_set.aggregate(sum('rating_post'))['rating_post__sum'] or 0
-        comment_rating = self.comment_set.aggregate(sum('rating_comment'))['rating_comment__sum'] or 0
-
-        self.rating_user = (post_rating * 3) + comment_rating
+        author_post_rating = Post.objects.filter(author_id=self.pk).aggregate(
+            post_rating_sum=Coalesce(Sum('rating_post') * 3, 0))
+        author_comment_rating = Comment.objects.filter(user_id=self.user).aggregate(
+            comments_rating_sum=Coalesce(Sum('rating_comment'), 0))
+        author_post_comment_rating = Comment.objects.filter(post__author__name=self.user).aggregate(
+            comments_rating_sum=Coalesce(Sum('rating_comment'), 0))
+        self.rating_author = author_post_rating['post_rating_sum'] + author_comment_rating['comments_rating_sum'] + author_post_comment_rating['comments_rating_sum']
         self.save()
+
 
 
 
@@ -23,7 +36,7 @@ class Author(models.Model):
 # Имеет единственное поле: название категории.
 # Поле должно быть уникальным (в определении поля необходимо написать параметр unique = True).
 class Category(models.Model):
-    category_name = models.CharField(unique=True)
+    category_name = models.CharField(max_length=100, unique=True)
 
 
 # Эта модель должна содержать в себе статьи и новости, которые создают пользователи.
@@ -36,28 +49,23 @@ class Category(models.Model):
 # заголовок статьи/новости;
 # текст статьи/новости;
 # рейтинг статьи/новости.
-article = 'article'
-news = 'news'
-choices = [
-    (article, 'статья'),
-    (news, 'новость'),
-]
+
 
 
 class Post(models.Model):
-    author_post = models.OneToOneField(Author, on_delete=models.CASCADE)
     type_post = models.CharField(max_length=10, choices=choices)
     data_time = models.DateTimeField(auto_now_add=True)
     post_category = models.ManyToManyField(Category, through='PostCategory')
-    title_post = models.CharField()
+    title_post = models.CharField(max_length=255)
     text_post = models.TextField()
-    rating_post = models.FloatField()
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    rating = models.FloatField()
 
     def like(self):
-        self.rating_post += 1
+        self.rating += 1
 
     def dislike(self):
-        self.rating_post -= 1
+        self.rating -= 1
 
     def preview(self):
         if len(self.text_post) > 124:
@@ -87,10 +95,10 @@ class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     text_comment = models.TextField()
     data_time = models.DateTimeField(auto_now_add=True)
-    rating_comment = models.FloatField(default=0)
+    rating = models.FloatField(default=0)
 
     def like(self):
-        self.rating_comment += 1
+        self.rating += 1
 
     def dislike(self):
-        self.rating_comment -= 1
+        self.rating -= 1
