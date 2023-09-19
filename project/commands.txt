@@ -1,0 +1,76 @@
+--Создать двух пользователей (с помощью метода User.objects.create_user('username')).
+u1 = User.objects.create_user('user1'))
+u2 = User.objects.create_user('user2'))
+
+--Создать два объекта модели Author, связанные с пользователями.
+a1 = Author.objects.create(user=u1)
+a2 = Author.objects.create(user=u2)
+
+--Добавить 4 категории в модель Category.
+category1 = Category.objects.create(category_name='category1')
+category2 = Category.objects.create(category_name='category2')
+category3 = Category.objects.create(category_name='category3')
+category4 = Category.objects.create(category_name='category4')
+
+--Добавить 2 статьи и 1 новость.
+--Присвоить им категории (как минимум в одной статье/новости должно быть не меньше 2 категорий).
+st1 = Post.objects.create(type_post='AR', title_post='title', text_post='text', author=a1)
+    ...: st1.post_category.set([category1])
+st2 = Post.objects.create(type_post='AR', title_post='title', text_post='text', author=a1)
+    ...: st2.post_category.set([category1, category2])
+ne1 = Post.objects.create(type_post='NE', title_post='title', text_post='text', author=a1)
+    ...: st1.post_category.set([category3])
+
+--Создать как минимум 4 комментария к разным объектам модели Post (в каждом объекте должен быть как минимум один комментарий).
+c1 = Comment.objects.create(text_comment='comment', post=st1, user=a1.user)
+c2 = Comment.objects.create(text_comment='comment', post=st2, user=a1.user)
+c3 = Comment.objects.create(text_comment='comment', post=ne1, user=a1.user)
+c4 = Comment.objects.create(text_comment='comment', post=ne1, user=a1.user)
+
+--Применяя функции like() и dislike() к статьям/новостям и комментариям, скорректировать рейтинги этих объектов.
+st1.like()
+st2.dislike()
+ne1.like()
+ne1.like()
+c1.like()
+c2.dislike()
+c4.dislike()
+c3.like()
+
+--Обновить рейтинги пользователей.
+a1.update_rating()
+a1.rating
+
+--Вывести username и рейтинг лучшего пользователя (применяя сортировку и возвращая поля первого объекта).
+authors = Author.objects.all()
+for author in authors: author.update_rating()
+
+authors_with_rating = Author.objects.annotate(total_rating=Sum(F('post__rating') * 3) + Sum('user__comment__rating'))
+best_author = authors_with_rating.order_by('-total_rating').first()
+
+print(f'Лучший пользователь: {best_author.user.username}')
+print(f'Рейтинг: {best_author.total_rating}')
+
+
+--Вывести дату добавления, username автора, рейтинг, заголовок и превью лучшей статьи, основываясь на лайках/дислайках к этой статье.
+posts_with_rating = Post.objects.annotate(total_rating=Sum(F('rating') + F('comment__rating')))
+
+best_post = posts_with_rating.order_by('-total_rating').first()
+
+print(f'Дата добавления: {best_post.data_time}')
+print(f'Username автора: {best_post.author.user.username}')
+print(f'Рейтинг: {best_post.total_rating}')
+print(f'Заголовок: {best_post.title_post}')
+print(f'Превью: {best_post.preview()}')
+
+--
+Вывести все комментарии (дата, пользователь, рейтинг, текст) к этой статье.
+comments = Comment.objects.filter(post=best_post)
+
+for comment in comments:
+     print(f'Дата: {comment.data_time}')
+     print(f'Пользователь: {comment.user.username}')
+     print(f'Рейтинг: {comment.rating}')
+     print(f'Текст комментария: {comment.text_comment}')
+     print('-------------------')
+
