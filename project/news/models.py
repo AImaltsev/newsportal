@@ -17,14 +17,26 @@ class Author(models.Model):
     rating = models.IntegerField(default=0)
 
     def update_rating(self):
-        author_post_rating = Post.objects.filter(author_id=self.pk).aggregate(
-            post_rating_sum=Coalesce(Sum('rating') * 3, 0, output_field=IntegerField()))
-        author_comment_rating = Comment.objects.filter(user_id=self.user).aggregate(
-            comments_rating_sum=Coalesce(Sum('rating'), 0, output_field=IntegerField()))
-        author_post_comment_rating = Comment.objects.filter(post__author__user=self.user).aggregate(
-            comments_rating_sum=Coalesce(Sum('rating'), 0, output_field=IntegerField()))
-        self.rating = author_post_rating['post_rating_sum'] + author_comment_rating['comments_rating_sum'] + \
-                             author_post_comment_rating['comments_rating_sum']
+        post_rating = 0
+        comments_rating = 0
+        post_comments_rating = 0
+        posts = Post.objects.filter(author=self)
+        for p in posts:
+            post_rating += p.rating
+        comments = Comment.objects.filter(user=self.user)
+        for c in comments:
+            comments_rating += c.rating
+        posts_comments = Comment.objects.filter(post__author=self)
+        for pc in posts_comments:
+            post_comments_rating += pc.rating
+
+        print(post_rating)
+        print('-------------')
+        print(comments_rating)
+        print('-------------')
+        print(post_comments_rating)
+
+        self.rating = post_rating * 3 + comments_rating + post_comments_rating
         self.save()
 
 
@@ -43,9 +55,11 @@ class Post(models.Model):
 
     def like(self):
         self.rating += 1
+        self.save()
 
     def dislike(self):
         self.rating -= 1
+        self.save()
 
     def preview(self):
         if len(self.text_post) > 124:
@@ -68,6 +82,8 @@ class Comment(models.Model):
 
     def like(self):
         self.rating += 1
+        self.save()
 
     def dislike(self):
         self.rating -= 1
+        self.save()
