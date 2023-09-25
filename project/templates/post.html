@@ -1,0 +1,17 @@
+{% extends 'flatpages/default.html' %}
+
+{% block title %}
+News
+{% endblock title %}
+
+<!-- В контенте на странице мы выводим все новости -->
+{% block content %}
+<h1>post</h1>
+Заголовок: {{ post.title_post }}<br>
+Текст поста: {{ post.text_post }}<br>
+Тип поста: {{ post.type_post }}<br>
+Категория поста: {{ post.post_category }}<br>
+Автор:{{ post.author }}<br>
+Рейтинг поста:{{ post.rating }}<br>
+{% endblock content %}
+
