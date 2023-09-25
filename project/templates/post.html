@@ -6,12 +6,13 @@ News
 
 <!-- В контенте на странице мы выводим все новости -->
 {% block content %}
-<h1>post</h1>
-Заголовок: {{ post.title_post }}<br>
+<h1>{{ post.title_post }}</h1>
+
 Текст поста: {{ post.text_post }}<br>
 Тип поста: {{ post.type_post }}<br>
 Категория поста: {{ post.post_category }}<br>
 Автор:{{ post.author }}<br>
 Рейтинг поста:{{ post.rating }}<br>
+Дата:{{ time_now|date:'M d Y' }}<br>
 {% endblock content %}
 
