@@ -1,5 +1,8 @@
 {% extends 'flatpages/default.html' %}
 
+{% load custom_filters %}
+{% load custom_tags %}
+
 {% block title %}
 News
 {% endblock title %}
@@ -21,6 +24,7 @@ News
                <td>Дата публикации</td>
            </tr>
 
+
            <!-- Для каждого товара будете генерироваться новая строчка,
            т.е. новый HTML код, который указан в теле цикла.
            При этом сам цикл работает точно так же, как и в Python.
@@ -31,13 +35,13 @@ News
                 от переменных в Python. Здесь также можно получать доступ к
                 полям объекта модели. Например, здесь мы выводим имя,
                 в следующем столбце описание, и т.д.  -->
-               <td>{{ post.title_post }}</td>
+               <td>{{ post.title_post|censor }}</td>
                <td>{{ post.text_post|truncatewords:20 }}</td>
                <td>{{ post.post_category }}</td>
                <td>{{ post.type_post }}</td>
-               <td>{{ post.author }}</td>
+               <td>{{ post.author|currency:"usd" }}</td>
                <td>{{ post.rating }}</td>
-               <td>{{ time_now|date:'M d Y' }}</td>
+               <td>{% current_time '%b %d %Y' %}</td>
            </tr>
            {% endfor %}
 
