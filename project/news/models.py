@@ -43,6 +43,9 @@ class Author(models.Model):
 class Category(models.Model):
     category_name = models.CharField(max_length=100, unique=True)
 
+    def __str__(self):
+        return self.category_name
+
 
 class Post(models.Model):
     type_post = models.CharField(max_length=10, choices=choices)

@@ -16,9 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from .views import PostsList, PostViews
+from .views import PostsList, PostViews, Search
 
 urlpatterns = [
     path('', PostsList.as_view()),
     path('<int:pk>', PostViews.as_view()),
+    path('search', Search.as_view()),
 ]

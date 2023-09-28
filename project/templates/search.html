@@ -4,18 +4,21 @@
 {% load custom_tags %}
 
 {% block title %}
-News
+Поиск по постам
 {% endblock title %}
 
 <!-- В контенте на странице мы выводим все новости -->
 {% block content %}
-   <h1>Все посты</h1>
-    <h3>На странице {{ posts|length }} постов</h3>
-
+   <h1>Поиск по постам</h1>
+    <h3>всего {{ search|length }} постов</h3>
+<form method="GET">
+    {{ filter.form }} <!-- Форму от фильтров за нас сделает Django. А вот кнопку, увы придётся делать самому -->
+    <input type="submit" value="Найти">
+</form>
    <hr>
 
 
-    {% if posts %}
+    {% if search %}
        <table>
            <tr>
                <td>Название</td>
@@ -32,20 +35,20 @@ News
            т.е. новый HTML код, который указан в теле цикла.
            При этом сам цикл работает точно так же, как и в Python.
            post — переменная цикла, т.е. наш товар полученный из списка -->
-           {% for post in filter.qs %}
-           {% for category in post.post_category.all %}
+           {% for search in filter.qs %}
+           {% for category in search.post_category.all %}
            <tr>
                <!-- Не забываем, что переменные в шаблоне ничем не отличаются
                 от переменных в Python. Здесь также можно получать доступ к
                 полям объекта модели. Например, здесь мы выводим имя,
                 в следующем столбце описание, и т.д.  -->
-               <td>{{ post.title_post|censor }}</td>
-               <td>{{ post.text_post|truncatewords:20 }}</td>
+               <td>{{ search.title_post|censor }}</td>
+               <td>{{ search.text_post|truncatewords:20 }}</td>
                <td>{{ category.category_name }}</td>
-               <td>{{ post.type_post }}</td>
-               <td>{{ post.author|currency:"usd" }}</td>
-               <td>{{ post.rating }}</td>
-               <td>{% current_time '%b %d %Y' %}</td>
+               <td>{{ search.type_post }}</td>
+               <td>{{ search.author|currency:"usd" }}</td>
+               <td>{{ search.rating }}</td>
+               <td>{{ search.data_time|date:"M d Y" }}</td>
            </tr>
            {% endfor %}
            {% endfor %}
@@ -55,28 +58,5 @@ News
        <h2>Постов нет!</h2>
    {% endif %}
 
-{% if is_paginated %}
-
-    <!-- Если доступна предыдущая страница, то даём ссылку на неё и самую первую страницу -->
-    {% if page_obj.has_previous %}
-        <a href="?page=1">First</a>
-        <a href="?page={{ page_obj.previous_page_number }}"><<<</a>
-    {% endif %}
-
-    <!-- Показываем только текущую страницу и ближайшие к ней, чтобы список не тянулся и не захламлял страницу -->
-    {% for num in page_obj.paginator.page_range %}
-        {% if page_obj.number == num %}
-            <a>{{ num }}</a>
-        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}            <a href="?page={{ num }}">{{ num }}</a>
-        {% endif %}
-    {% endfor %}
-
-    <!-- Если есть следующая страница, то даём ссылку на неё и на самую последнюю страницу -->
-    {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}">>>></a>
-        <a href="?page={{ page_obj.paginator.num_pages }}">Last</a>
-    {% endif %}
-
-{% endif %}
 {% endblock content %}
 
