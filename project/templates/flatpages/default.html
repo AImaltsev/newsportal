@@ -4,6 +4,11 @@
 <title>{% block title %}{% endblock %}</title>
 </head>
 <body>
+<ul>
+    <li><a href="{% url 'posts' %}">Новости</a></li>
+    <li><a href="{% url 'search' %}">Поиск</a></li>
+    <li><a href="{% url 'post_create' %}">Добавить пост</a></li>
+</ul>
 {% block content %}{% endblock %}
 </body>
 </html>

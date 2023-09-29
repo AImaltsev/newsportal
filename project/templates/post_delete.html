@@ -1,11 +1,10 @@
 {% extends 'flatpages/default.html' %}
 
-{% block title %}
-News
-{% endblock title %}
+{% block title %} Удалить пост {% endblock title %}
 
-<!-- В контенте на странице мы выводим все новости -->
 {% block content %}
+<h2>Вы действительно хотите удалить данный пост?</h2>
+
 <h1>{{ post.title_post }}</h1>
 {% for category in post.post_category.all %}
 Текст поста: {{ post.text_post }}<br>
@@ -15,5 +14,8 @@ News
 Рейтинг поста:{{ post.rating }}<br>
 Дата:{{ time_now|date:'M d Y' }}<br>
 {% endfor %}
-{% endblock content %}
 
+<form method="POST">
+    {% csrf_token %}
+    <input type="submit" value="подтвердить"></form>
+{% endblock content %}

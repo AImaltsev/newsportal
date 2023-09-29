@@ -16,10 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from .views import PostsList, PostViews, Search
+from .views import PostsList, PostViews, Search, PostCreateView, PostDeleteView, PostUpdateView
 
 urlpatterns = [
-    path('', PostsList.as_view()),
-    path('<int:pk>', PostViews.as_view()),
-    path('search', Search.as_view()),
+    path('', PostsList.as_view(), name='posts'),
+    path('<int:pk>', PostViews.as_view(), name = 'post'),
+    path('search', Search.as_view(), name='search'),
+    path('add/', PostCreateView.as_view(), name='post_create'),
+    path('<int:pk>/edit', PostUpdateView.as_view(), name='post_update'),
+    path('<int:pk>/delete', PostDeleteView.as_view(), name='post_delete'),
 ]
