@@ -1,11 +1,12 @@
 from django.shortcuts import render
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from .models import Post, Category
 from datetime import datetime
 from django.views import View
 from django.core.paginator import Paginator
 from .filters import PostFilter
 from .forms import PostForm
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 class PostsList(ListView):
@@ -58,13 +59,13 @@ class Search(ListView):
         return context
 
 
-class PostCreateView(CreateView):
+class PostCreateView(CreateView, LoginRequiredMixin):
     template_name = 'create.html'
     form_class = PostForm
 
 
 # дженерик для редактирования объекта
-class PostUpdateView(UpdateView):
+class PostUpdateView(UpdateView, LoginRequiredMixin):
     template_name = 'edit.html'
     form_class = PostForm
 
