@@ -6,7 +6,7 @@ from django.views import View
 from django.core.paginator import Paginator
 from .filters import PostFilter
 from .forms import PostForm
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 
 
 class PostsList(ListView):
@@ -59,13 +59,15 @@ class Search(ListView):
         return context
 
 
-class PostCreateView(CreateView, LoginRequiredMixin):
+class PostCreateView(CreateView, LoginRequiredMixin, PermissionRequiredMixin):
+    permission_required = 'news.add_post'
     template_name = 'create.html'
     form_class = PostForm
 
 
 # дженерик для редактирования объекта
-class PostUpdateView(UpdateView, LoginRequiredMixin):
+class PostUpdateView(UpdateView, LoginRequiredMixin, PermissionRequiredMixin):
+    permission_required = 'news.change_post'
     template_name = 'edit.html'
     form_class = PostForm
 
