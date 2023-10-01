@@ -59,14 +59,14 @@ class Search(ListView):
         return context
 
 
-class PostCreateView(CreateView, LoginRequiredMixin, PermissionRequiredMixin):
+class PostCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     permission_required = 'news.add_post'
     template_name = 'create.html'
     form_class = PostForm
 
 
 # дженерик для редактирования объекта
-class PostUpdateView(UpdateView, LoginRequiredMixin, PermissionRequiredMixin):
+class PostUpdateView(PermissionRequiredMixin, LoginRequiredMixin, UpdateView):
     permission_required = 'news.change_post'
     template_name = 'edit.html'
     form_class = PostForm
