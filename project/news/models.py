@@ -2,6 +2,10 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Sum, IntegerField
 from django.db.models.functions import Coalesce
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils import timezone
+from datetime import timedelta
 
 article = 'AR'
 news = 'NE'
@@ -10,6 +14,20 @@ choices = [
     (article, 'Cтатья'),
     (news, 'Новость'),
 ]
+
+
+def send_weekly_subscription_emails():
+    today = timezone.now().date()
+    start_of_week = today - timedelta(days=today.weekday())
+
+    end_of_week = start_of_week + timedelta(days=6)
+
+    new_articles = Post.objects.filter(
+        data_time__date__range=[start_of_week, end_of_week],
+    )
+
+    for article in new_articles:
+        article.send_subscription_emails()
 
 
 class Author(models.Model):
@@ -42,6 +60,7 @@ class Author(models.Model):
 
 class Category(models.Model):
     category_name = models.CharField(max_length=100, unique=True)
+    subscribers = models.ManyToManyField(User, related_name='subscribed_categories', blank=True)
 
     def __str__(self):
         return self.category_name
@@ -70,8 +89,30 @@ class Post(models.Model):
         else:
             return self.text_post
 
-    def get_absolute_url(self):  # добавим абсолютный путь, чтобы после создания нас перебрасывало на страницу с товаром
+    def get_absolute_url(self):
         return f'/news/{self.id}'
+
+    def send_subscription_emails(self):
+
+        categories = self.post_category.all()
+        subject = self.title_post
+
+        for category in categories:
+            subscribers = category.subscribers.all()
+            for subscriber in subscribers:
+                user_name = subscriber.username
+
+                context = {'post': self, 'user': user_name}
+
+                html_message = render_to_string('email_template.html', context)
+
+                send_mail(
+                    subject,
+                    '',  # Оставляем пустым, так как текст письма будет в HTML
+                    'boomer47@yandex.ru',
+                    [subscriber.email],
+                    html_message=html_message
+                )
 
 
 class PostCategory(models.Model):
@@ -93,3 +134,17 @@ class Comment(models.Model):
     def dislike(self):
         self.rating -= 1
         self.save()
+
+
+class Subscription(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('user', 'category')
+
+
+class UserPostLimit(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.DateField(default=timezone.now)
+    post_count = models.IntegerField(default=0)

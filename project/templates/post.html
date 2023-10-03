@@ -7,13 +7,21 @@ News
 <!-- В контенте на странице мы выводим все новости -->
 {% block content %}
 <h1>{{ post.title_post }}</h1>
+
+  Текст поста: {{ post.text_post }}<br>
+  Тип поста: {{ post.type_post }}<br>
 {% for category in post.post_category.all %}
-Текст поста: {{ post.text_post }}<br>
-Тип поста: {{ post.type_post }}<br>
-Категория поста: {{ category.category_name }}<br>
-Автор:{{ post.author }}<br>
-Рейтинг поста:{{ post.rating }}<br>
-Дата:{{ time_now|date:'M d Y' }}<br>
+  Категория поста: {{ category.category_name }}
+
+  {% if user in category.subscribers.all %}
+    <a href="{% url 'subscribe_to_category' post.id %}">Отписаться</a>
+  {% else %}
+    <a href="{% url 'subscribe_to_category' post.id %}">Подписаться</a>
+  {% endif %}<br>
 {% endfor %}
+  Автор:{{ post.author }}<br>
+  Рейтинг поста:{{ post.rating }}<br>
+  Дата:{{ post.data_time|date:'M d Y' }}<br>
+
 {% endblock content %}
 

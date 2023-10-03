@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from .views import PostsList, PostViews, Search, PostCreateView, PostDeleteView, PostUpdateView
+from . import views
 
 urlpatterns = [
     path('', PostsList.as_view(), name='posts'),
@@ -25,4 +26,5 @@ urlpatterns = [
     path('add/', PostCreateView.as_view(), name='post_create'),
     path('<int:pk>/edit', PostUpdateView.as_view(), name='post_update'),
     path('<int:pk>/delete', PostDeleteView.as_view(), name='post_delete'),
+    path('subscribe_to_category/<int:post_id>/', views.subscribe_to_category, name='subscribe_to_category'),
 ]
