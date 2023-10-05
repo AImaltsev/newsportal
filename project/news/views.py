@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from .models import Post, Category, Author, User
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.views import View
 from django.core.paginator import Paginator
 from .filters import PostFilter
@@ -10,6 +10,7 @@ from .forms import PostForm
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib import messages
 from django.template.loader import render_to_string
+
 
 
 class PostsList(ListView):
@@ -74,7 +75,7 @@ class PostCreateView(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
             today = datetime.now().date()
             posts_created_today = Post.objects.filter(author__user=user, data_time__date=today).count()
 
-            if posts_created_today >= 3:
+            if posts_created_today >= 10:
                 messages.error(self.request, 'Вы превысили лимит на создание записей сегодня.')
                 return self.render_to_response(self.get_context_data(form=form))
 
@@ -136,3 +137,7 @@ def subscribe_to_category(request, post_id):
         messages.success(request, f'Вы успешно подписались на категорию "{category.category_name}".')
 
     return redirect(request.META.get('HTTP_REFERER'))
+
+
+
+

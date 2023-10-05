@@ -5,7 +5,10 @@ from django.db.models.functions import Coalesce
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta, datetime
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 article = 'AR'
 news = 'NE'
@@ -14,21 +17,6 @@ choices = [
     (article, 'Cтатья'),
     (news, 'Новость'),
 ]
-
-
-def send_weekly_subscription_emails():
-    today = timezone.now().date()
-    start_of_week = today - timedelta(days=today.weekday())
-
-    end_of_week = start_of_week + timedelta(days=6)
-
-    new_articles = Post.objects.filter(
-        data_time__date__range=[start_of_week, end_of_week],
-    )
-
-    for article in new_articles:
-        article.send_subscription_emails()
-
 
 class Author(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -93,7 +81,6 @@ class Post(models.Model):
         return f'/news/{self.id}'
 
     def send_subscription_emails(self):
-
         categories = self.post_category.all()
         subject = self.title_post
 
@@ -106,6 +93,7 @@ class Post(models.Model):
 
                 html_message = render_to_string('email_template.html', context)
 
+
                 send_mail(
                     subject,
                     '',  # Оставляем пустым, так как текст письма будет в HTML
@@ -113,6 +101,10 @@ class Post(models.Model):
                     [subscriber.email],
                     html_message=html_message
                 )
+
+
+
+
 
 
 class PostCategory(models.Model):
@@ -148,3 +140,36 @@ class UserPostLimit(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateField(default=timezone.now)
     post_count = models.IntegerField(default=0)
+
+
+def send_weekly_news():
+    print("send_weekly_news is running")
+    logging.info("send_weekly_news started")
+    # Найдем все посты (новости и статьи), опубликованные за последнюю неделю (7 дней назад от текущей даты)
+    last_week = datetime.now() - timedelta(days=7)
+    posts = Post.objects.filter(data_time__gte=last_week)
+
+    # Получим список всех пользователей
+    users = User.objects.all()
+
+    for user in users:
+        # Формируем сообщение для отправки
+        subject = 'Еженедельная рассылка новостей'
+        user_name = user.username
+        context = {'posts': posts, 'user': user_name}
+
+        # Используем render_to_string с вашим шаблоном 'weekly_newsletter.html'
+        html_message = render_to_string('weekly_newsletter.html', context)
+
+        # Отправляем письмо на почту пользователя
+        send_mail(
+            subject,
+            '',  # Оставляем пустым, так как текст письма будет в HTML
+            'boomer47@yandex.ru',  # Замените на свой email
+            [user.email],
+            html_message=html_message
+        )
+
+        logging.info('Отправлено письмо пользователю %s', user.username)
+
+    logging.info("send_weekly_news completed")

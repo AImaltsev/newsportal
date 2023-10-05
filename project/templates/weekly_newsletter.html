@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Еженедельная рассылка новостей</title>
+</head>
+<body>
+    <h1>Еженедельная рассылка новостей</h1>
+
+    {% for post in posts %}
+    <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 20px;">
+        <h2>{{ post.title_post }}</h2>
+        <p><strong>Дата:</strong> {{ post.data_time }}</p>
+        <p>{{ post.text_post }}</p>
+        <p><a href="{{ post.get_absolute_url }}">Читать полностью</a></p>
+    </div>
+    {% endfor %}
+</body>
+</html>
