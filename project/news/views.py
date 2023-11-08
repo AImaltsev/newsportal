@@ -17,24 +17,11 @@ from django.utils import timezone
 
 
 class Index(View):
-    def get(self, request):
-        curent_time = timezone.now()
-
-        # .  Translators: This message appears on the home page only
-        models = MyModel.objects.all()
-
-        context = {
-            'models': models,
-            'current_time': timezone.now(),
-            'timezones': pytz.common_timezones  # добавляем в контекст все доступные часовые пояса
-        }
-
-        return HttpResponse(render(request, 'index.html', context))
-
-    #  по пост-запросу будем добавлять в сессию часовой пояс, который и будет обрабатываться написанным нами ранее middleware
-    def post(self, request):
-        request.session['django_timezone'] = request.POST['timezone']
-        return redirect('/')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current_time'] = timezone.localtime(timezone.now())
+        context['timezones'] = pytz.common_timezones
+        return context
 
 class PostsList(ListView):
     model = Post
