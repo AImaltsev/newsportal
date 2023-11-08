@@ -12,19 +12,36 @@ from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMix
 from django.contrib import messages
 from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
+import pytz #  импортируем стандартный модуль для работы с часовыми поясами
+from django.utils import timezone
 
 
 class Index(View):
     def get(self, request):
-        string = _('Hello world')
+        curent_time = timezone.now()
 
-        return HttpResponse(string)
+        # .  Translators: This message appears on the home page only
+        models = MyModel.objects.all()
+
+        context = {
+            'models': models,
+            'current_time': timezone.now(),
+            'timezones': pytz.common_timezones  # добавляем в контекст все доступные часовые пояса
+        }
+
+        return HttpResponse(render(request, 'index.html', context))
+
+    #  по пост-запросу будем добавлять в сессию часовой пояс, который и будет обрабатываться написанным нами ранее middleware
+    def post(self, request):
+        request.session['django_timezone'] = request.POST['timezone']
+        return redirect('/')
 
 class PostsList(ListView):
     model = Post
     template_name = 'posts.html'
     context_object_name = 'posts'
     paginate_by = 10
+    form_class = PostForm
 
     def get_queryset(self):
         # Получаем отфильтрованный queryset с помощью фильтра

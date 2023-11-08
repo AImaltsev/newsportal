@@ -1,29 +1,31 @@
 {% extends 'flatpages/default.html' %}
-
+{% load i18n %}
 {% load custom_filters %}
 {% load custom_tags %}
 
 {% block title %}
-Новости
+{% trans "Новости" %}
 {% endblock title %}
 
 <!-- В контенте на странице мы выводим все новости -->
 {% block content %}
-   <h1>Все посты</h1>
-    <h3>На странице {{ posts|length }} постов</h3>
+   <h1>{% trans "Все посты" %}</h1>
+    <h3>{% trans "На странице" %}
+        {{ posts|length }}
+        {% trans "постов" %}</h3>
 
    <hr>
 
     {% if posts %}
        <table>
            <tr>
-               <td>Название</td>
-               <td>Описание</td>
-               <td>Категория</td>
-               <td>Тип поста</td>
-               <td>Автор</td>
-               <td>Рейтинг статьи</td>
-               <td>Дата публикации</td>
+               <td>{% trans "Название" %}</td>
+               <td>{% trans "Описание" %}</td>
+               <td>{% trans "Категория" %}</td>
+               <td>{% trans "Тип поста" %}</td>
+               <td>{% trans "Автор" %}</td>
+               <td>{% trans "Рейтинг статьи" %}</td>
+               <td>{% trans "Дата публикации" %}</td>
            </tr>
 
            <!-- Для каждого поста будет генерироваться новая строка -->
@@ -32,8 +34,8 @@
            <tr>
                <td>
                    <a href="{% url 'post' post.id %}">{{ post.title_post|censor }}</a>
-                   <a href="{% url 'post_update' post.id %}"><u>Редактировать</u></a>
-                   <a href="{% url 'post_delete' post.id %}"><u> Удалить </u></a>
+                   <a href="{% url 'post_update' post.id %}"><u>{% trans "Редактировать" %}</u></a>
+                   <a href="{% url 'post_delete' post.id %}"><u>{% trans "Удалить" %}  </u></a>
                </td>
                <td>{{ post.text_post|truncatewords:20 }}</td>
                <td>{{ category.category_name }}</td>
@@ -46,7 +48,7 @@
            {% endfor %}
        </table>
    {% else %}
-       <h2>Постов нет!</h2>
+       <h2>{% trans "Постов нет!" %}</h2>
    {% endif %}
 
 {% if is_paginated %}
